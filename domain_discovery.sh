@@ -48,9 +48,16 @@ echo "Fetching subdomains from Wayback URLs..."
 curl -s "http://web.archive.org/cdx/search/cdx?url=*.${TARGET_DOMAIN}/*&output=text&fl=original&collapse=urlkey" | \
     sed -e 's_https*://__' -e "s/\/.*//" | sed 's/www\.//g' | sed 's/:80//g' | sort -u | tee $WAYBACK_FILE
 
-# Manual subdomains (This needs manual intervention to add subdomains)
-echo "Please add any manual subdomains to $MANUAL_FILE, then press Enter to continue."
-read
+# Manual subdomains
+echo ""
+echo "##############################################################"
+echo "Please add any manual subdomains you have (e.g., from Shodan or Censys) to $MANUAL_FILE."
+echo "If you don't have any, press Enter within 10 seconds to continue."
+echo "##############################################################"
+echo ""
+
+# Read with a 10-second timeout
+read -t 10 -p "Add manual subdomains and press Enter to continue, or wait for the timeout: " 
 
 # Merge and sort all subdomains
 echo "Merging and sorting all subdomains..."
@@ -63,3 +70,14 @@ cat $MANUAL_FILE | anew $SUBS_FILE
 sort -u -o $SUBS_FILE $SUBS_FILE
 
 echo "Subdomain discovery completed. Results saved in $TARGET_FOLDER."
+
+# Banner for live subdomain checks
+echo ""
+echo "##############################################################"
+echo "Subdomain discovery is complete."
+echo "Now, it's time to get live subdomains. Run the following commands:"
+echo ""
+echo "httpx -list $SUBS_FILE -o $TARGET_FOLDER/livesubs.txt"
+echo "httpx -status-code -title -tech-detect -list $TARGET_FOLDER/livesubs.txt"
+echo "##############################################################"
+echo ""
