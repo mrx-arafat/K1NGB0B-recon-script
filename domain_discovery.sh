@@ -7,14 +7,18 @@ if [ "$#" -ne 1 ]; then
 fi
 
 TARGET_DOMAIN=$1
+TARGET_FOLDER="${TARGET_DOMAIN//./_}"
+
+# Create target directory
+mkdir -p "$TARGET_FOLDER"
 
 # Output files
-ASSETFINDER_FILE="assetfinder.txt"
-SUBFINDER_FILE="subfinder.txt"
-CRT_FILE="crt.txt"
-WAYBACK_FILE="waybacksubs.txt"
-MANUAL_FILE="manualsub.txt"
-SUBS_FILE="subs.txt"
+ASSETFINDER_FILE="$TARGET_FOLDER/assetfinder.txt"
+SUBFINDER_FILE="$TARGET_FOLDER/subfinder.txt"
+CRT_FILE="$TARGET_FOLDER/crt.txt"
+WAYBACK_FILE="$TARGET_FOLDER/waybacksubs.txt"
+MANUAL_FILE="$TARGET_FOLDER/manualsub.txt"
+SUBS_FILE="$TARGET_FOLDER/subs.txt"
 
 # Create or clear output files
 > $ASSETFINDER_FILE
@@ -58,4 +62,4 @@ cat $WAYBACK_FILE | anew $SUBS_FILE
 cat $MANUAL_FILE | anew $SUBS_FILE
 sort -u -o $SUBS_FILE $SUBS_FILE
 
-echo "Subdomain discovery completed. Results saved in $SUBS_FILE."
+echo "Subdomain discovery completed. Results saved in $TARGET_FOLDER."
