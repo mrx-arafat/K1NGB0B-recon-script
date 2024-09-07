@@ -14,7 +14,6 @@ cats.mist.ac.bd
 ceaam.mist.ac.bd
 ce-api-cats.mist.ac.bd
 ce-cats.mist.ac.bd
-cece-cats.mist.ac.bd
 ce.mist.ac.bd
 cewce.mist.ac.bd
 cicm2015.mist.ac.bd

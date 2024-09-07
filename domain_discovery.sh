@@ -57,7 +57,7 @@ echo "##############################################################"
 echo ""
 
 # Read with a 10-second timeout
-read -t 10 -p "Add manual subdomains and press Enter to continue, or wait for the timeout: " 
+read -t 10 -p "Add manual subdomains and press Enter to continue, or wait for the timeout: "
 
 # Merge and sort all subdomains
 echo "Merging and sorting all subdomains..."
@@ -81,3 +81,17 @@ echo "httpx -list $SUBS_FILE -o $TARGET_FOLDER/livesubs.txt"
 echo "httpx -status-code -title -tech-detect -list $TARGET_FOLDER/livesubs.txt"
 echo "##############################################################"
 echo ""
+
+# Ask if the user wants to run the httpx commands now
+read -p "Do you want to run the httpx commands now? (y/n): " RUN_HTTPX
+
+if [[ "$RUN_HTTPX" == "y" || "$RUN_HTTPX" == "Y" ]]; then
+    echo "Running httpx commands..."
+    httpx -list $SUBS_FILE -o $TARGET_FOLDER/livesubs.txt
+    httpx -status-code -title -tech-detect -list $TARGET_FOLDER/livesubs.txt
+else
+    echo ""
+    echo "##############################################################"
+    echo "Recon by Arafat-X30N"
+    echo "##############################################################"
+fi
