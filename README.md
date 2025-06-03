@@ -1,64 +1,123 @@
 # K1NGB0B Recon Script
 
-🎯 **Simple Domain Reconnaissance Tool for Bug Bounty Hunters**
+A simple and efficient domain reconnaissance tool designed for bug bounty hunters and security researchers.
 
-## Quick Start
+## Installation
 
-1. **Install all dependencies:**
+Run the automated installer to set up all dependencies:
+
+```bash
+chmod +x install.sh && ./install.sh
+```
+
+The installer will automatically handle:
+- System package installation (Python, Go, curl, wget, git)
+- Python dependencies (aiohttp)
+- Go reconnaissance tools (assetfinder, subfinder, httpx, anew)
+- PATH configuration
+
+## Usage
+
+1. **Run the script:**
    ```bash
-   chmod +x install.sh && ./install.sh
+   python3 k1ngb0b_recon.py
    ```
 
-2. **Run the tool:**
-   ```bash
-   python k1ngb0b_recon.py
+2. **Enter target domain when prompted:**
+   ```
+   Enter target domain: example.com
    ```
 
-3. **Enter your target domain when prompted**
-
-That's it! 🚀
+3. **Wait for results** - The tool will automatically:
+   - Find subdomains using multiple sources
+   - Check which subdomains are live
+   - Save organized results to a folder
 
 ## Features
 
-- 🔍 **Finds subdomains** using multiple sources (assetfinder, subfinder, crt.sh)
-- ✅ **Checks which are live** using httpx
-- 📁 **Organizes results** in clean folders
-- 📊 **Generates reports** in JSON format
-- 🛡️ **Dependency checking** - Won't run without all tools installed
-- 🐧 **Linux focused** - Optimized for Linux systems
+- **Multi-source subdomain enumeration** using assetfinder, subfinder, and Certificate Transparency
+- **Live subdomain detection** with httpx probing
+- **Asynchronous processing** for improved speed
+- **Automatic result organization** in timestamped folders
+- **JSON report generation** for easy parsing
+- **Dependency verification** ensures all tools are available before running
+- **Linux-optimized** with support for major distributions
 
-## Requirements (Auto-installed)
-
-- Python 3.8+
-- Go 1.19+
-- assetfinder (Go tool)
-- subfinder (Go tool)
-- httpx (Go tool)
-- anew (Go tool)
-- aiohttp (Python package)
-
-## Example Output
+## Output Structure
 
 ```
-🔍 Checking dependencies...
-✅ All dependencies found!
+target_domain_results/
+├── all_subdomains.txt      # All discovered subdomains
+├── live_subdomains.txt     # Live/responsive subdomains
+└── recon_report.json       # Detailed JSON report
+```
 
-🔍 Enter target domain (e.g., tesla.com): tesla.com
-✅ Target domain: tesla.com
+## Requirements
 
-🎯 Starting reconnaissance for: tesla.com
-🔍 Running assetfinder...
-   ✅ Found 15 subdomains
-🔍 Running subfinder...
-   ✅ Found 23 subdomains
-🔍 Checking Certificate Transparency (crt.sh)...
-   ✅ Found 12 subdomains
-🔍 Checking live subdomains...
-   ✅ Found 8 live subdomains
+**Automatically installed by the setup script:**
 
-📊 Results: 31 unique subdomains, 8 live
-📁 Results saved to: tesla_com_results/
-✅ Reconnaissance completed successfully!
+- Python 3.8 or higher
+- Go 1.19 or higher
+- assetfinder (subdomain discovery)
+- subfinder (subdomain discovery)
+- httpx (HTTP probing)
+- anew (result deduplication)
+- aiohttp (Python HTTP library)
+
+## Supported Systems
+
+- Ubuntu/Debian (apt)
+- CentOS/RHEL (yum)
+- Fedora (dnf)
+- Arch Linux (pacman)
+
+## Example Session
+
+```
+$ python3 k1ngb0b_recon.py
+
+K1NGB0B Recon Script v2.0
+Author: mrx-arafat
+
+Checking dependencies...
+All dependencies found!
+
+Enter target domain: tesla.com
+Target domain: tesla.com
+
+Starting reconnaissance for: tesla.com
+Running assetfinder...
+   Found 15 subdomains
+Running subfinder...
+   Found 23 subdomains
+Checking Certificate Transparency...
+   Found 12 subdomains
+Checking live subdomains...
+   Found 8 live subdomains
+
+Results: 31 unique subdomains, 8 live
+Results saved to: tesla_com_results/
+Reconnaissance completed successfully!
+```
+
+## Troubleshooting
+
+**If tools are not found in PATH:**
+```bash
+source ~/.bashrc
+# or restart your terminal
+```
+
+**Manual dependency installation:**
+```bash
+# Install Go tools manually
+go install github.com/tomnomnom/assetfinder@latest
+go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+go install github.com/projectdiscovery/httpx/cmd/httpx@latest
+go install github.com/tomnomnom/anew@latest
+
+# Install Python dependencies
+pip3 install --user aiohttp
 ```
 
 ## Author
