@@ -7,11 +7,13 @@ The K1NGB0B Recon Script has been completely reorganized and modernized from a s
 ## What Was Done
 
 ### 1. Complete Architecture Redesign
+
 - **From**: Single bash script (`domain_discovery.sh`)
 - **To**: Modular Python application with proper package structure
 - **Benefits**: Better maintainability, testability, and extensibility
 
 ### 2. Professional Project Structure
+
 ```
 K1NGB0B-recon-script/
 ├── README.md                    # Comprehensive documentation
@@ -41,6 +43,7 @@ K1NGB0B-recon-script/
 ### 3. Key Improvements
 
 #### Code Quality
+
 - **Type Hints**: Full type annotation throughout the codebase
 - **Error Handling**: Comprehensive error handling and logging
 - **Documentation**: Detailed docstrings and comments
@@ -48,6 +51,7 @@ K1NGB0B-recon-script/
 - **Linting**: Code follows Python best practices
 
 #### Functionality
+
 - **Async Processing**: Concurrent subdomain discovery for better performance
 - **Configuration**: YAML-based configuration system
 - **Progress Tracking**: Visual progress indicators with tqdm
@@ -56,6 +60,7 @@ K1NGB0B-recon-script/
 - **Modular Design**: Easy to extend with new tools and features
 
 #### User Experience
+
 - **CLI Interface**: Professional command-line interface with click
 - **One-Click Install**: Automated installation script
 - **Better Output**: Organized directory structure for results
@@ -65,6 +70,7 @@ K1NGB0B-recon-script/
 ### 4. Technical Stack
 
 #### Core Dependencies
+
 - **click**: Command-line interface
 - **aiohttp**: Async HTTP requests
 - **requests**: HTTP requests
@@ -74,6 +80,7 @@ K1NGB0B-recon-script/
 - **rich**: Enhanced terminal formatting
 
 #### External Tools (unchanged)
+
 - **assetfinder**: Subdomain discovery
 - **subfinder**: Subdomain discovery
 - **httpx**: Live subdomain verification
@@ -83,24 +90,28 @@ K1NGB0B-recon-script/
 ### 5. New Features
 
 #### Configuration Management
+
 - YAML configuration files
 - Tool-specific settings
 - Timeout and retry configuration
 - Output format options
 
 #### Enhanced Discovery
+
 - Concurrent processing
 - Better error handling
 - Progress tracking
 - Automatic deduplication
 
 #### Professional Output
+
 - Structured directory organization
 - JSON and text reports
 - Detailed logging
 - Summary statistics
 
 #### Developer Experience
+
 - Unit tests
 - Type hints
 - Comprehensive documentation
@@ -109,6 +120,7 @@ K1NGB0B-recon-script/
 ## Installation & Usage
 
 ### Quick Start
+
 ```bash
 # One-click installation
 chmod +x install.sh
@@ -122,6 +134,7 @@ python -m k1ngb0b_recon example.com --config config.yaml --verbose
 ```
 
 ### Development Setup
+
 ```bash
 # Install in development mode
 pip install -e .
@@ -136,12 +149,14 @@ python test_basic.py
 ## Migration from Original Script
 
 ### For Existing Users
+
 1. The original `domain_discovery.sh` is preserved for compatibility
 2. New Python version offers the same functionality plus many improvements
 3. Output format is similar but more organized
 4. All external tools remain the same
 
 ### Key Differences
+
 - **Installation**: Now requires Python dependencies
 - **Usage**: `python -m k1ngb0b_recon <domain>` instead of `./domain_discovery.sh <domain>`
 - **Output**: More organized directory structure
@@ -151,6 +166,7 @@ python test_basic.py
 ## Future Enhancements
 
 ### Planned Features
+
 - Web interface for remote usage
 - Database integration for result storage
 - Additional reconnaissance tools integration
@@ -159,7 +175,9 @@ python test_basic.py
 - Docker containerization
 
 ### Extensibility
+
 The modular design makes it easy to:
+
 - Add new subdomain discovery tools
 - Implement custom output formats
 - Integrate with other security tools
@@ -169,16 +187,19 @@ The modular design makes it easy to:
 ## Testing
 
 ### Basic Tests
+
 ```bash
 python test_basic.py
 ```
 
 ### Unit Tests
+
 ```bash
 python -m pytest tests/ -v
 ```
 
 ### Integration Tests
+
 ```bash
 # Test with a real domain (requires tools to be installed)
 python -m k1ngb0b_recon example.com --verbose
@@ -200,4 +221,4 @@ The project is now ready for production use and future development, while mainta
 
 **Author**: mrx-arafat (K1NGB0B)
 **Version**: 2.0.0
-**Date**: 2024
+**Date**: 2025
