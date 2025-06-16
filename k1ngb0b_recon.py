@@ -233,6 +233,10 @@ class SmartProgressTracker:
         """Update progress with smart effects and real-time stats."""
         current_time = time.time()
 
+        # Check if we have a current phase
+        if not self.current_phase or self.current_phase not in self.phase_times:
+            return  # Skip update if no active phase
+
         # Always update for better responsiveness
         percentage = (completed / total * 100) if total > 0 else 0
         elapsed = current_time - self.phase_times[self.current_phase]['start']
@@ -259,12 +263,14 @@ class SmartProgressTracker:
         self.last_update = current_time
 
     def add_discovery(self, subdomain: str, source: str):
-        """Add a discovery with real-time notification."""
-        self.discoveries.append({'subdomain': subdomain, 'source': source, 'time': time.time()})
+        """Add a discovery with smart notification."""
+        if subdomain and source:  # Safety check
+            self.discoveries.append({'subdomain': subdomain, 'source': source, 'time': time.time()})
 
-        # Show immediate discovery notification
-        if len(self.discoveries) % 10 == 0:  # Every 10 discoveries
-            print(f"\n   🎯 MILESTONE: {len(self.discoveries)} subdomains discovered!")
+            # Show milestone notifications at meaningful intervals
+            count = len(self.discoveries)
+            if count in [100, 500, 1000, 2000, 5000, 10000]:  # Major milestones only
+                print(f"\n   🎯 MILESTONE: {count:,} subdomains discovered!")
 
     def show_live_stats(self):
         """Show live statistics during processing."""
@@ -2340,48 +2346,40 @@ def run_wordlist_enumeration(domain: str, output_file: str) -> List[str]:
 
 
 async def run_comprehensive_passive_recon(domain: str, output_file: str) -> List[str]:
-    """Comprehensive passive reconnaissance using multiple sources for 99% coverage."""
-    print("🔍 Running comprehensive passive reconnaissance...")
+    """Comprehensive passive reconnaissance using working sources."""
 
     if not AIOHTTP_AVAILABLE:
-        print("   ⚠️  aiohttp not installed, using limited passive recon...")
         return await run_basic_passive_recon(domain, output_file)
 
     all_subdomains = set()
+    sources_successful = 0
+    sources_total = 0
 
-    # Comprehensive passive sources
-    passive_sources = {
-        'Certificate Transparency (crt.sh)': [
+    # Working passive sources (tested and reliable)
+    working_sources = {
+        'crt.sh': [
             f"https://crt.sh/?q={domain}&output=json",
             f"https://crt.sh/?q=%.{domain}&output=json"
         ],
-        'Certificate Transparency (censys)': [
-            f"https://search.censys.io/api/v1/search/certificates?q={domain}"
+        'hackertarget': [
+            f"https://api.hackertarget.com/hostsearch/?q={domain}"
         ],
-        'DNS Aggregators': [
-            f"https://dns.bufferover.run/dns?q=.{domain}",
-            f"https://tls.bufferover.run/dns?q=.{domain}"
+        'rapiddns': [
+            f"https://rapiddns.io/subdomain/{domain}?full=1"
         ],
-        'Threat Intelligence': [
-            f"https://otx.alienvault.com/api/v1/indicators/domain/{domain}/passive_dns",
-            f"https://www.virustotal.com/vtapi/v2/domain/report?apikey=public&domain={domain}"
-        ],
-        'Web Archives': [
-            f"https://web.archive.org/cdx/search/cdx?url=*.{domain}/*&output=json&fl=original&collapse=urlkey"
-        ],
-        'Search Engines': [
-            f"https://www.google.com/search?q=site:{domain}",
-            f"https://www.bing.com/search?q=site:{domain}"
+        'subdomaincenter': [
+            f"https://api.subdomain.center/?domain={domain}"
         ]
     }
 
     try:
-        connector = aiohttp.TCPConnector(limit=15, ttl_dns_cache=300)
-        timeout = aiohttp.ClientTimeout(total=45)
+        connector = aiohttp.TCPConnector(limit=10, ttl_dns_cache=300)
+        timeout = aiohttp.ClientTimeout(total=30)
 
         async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
-            for source_name, urls in passive_sources.items():
-                print(f"   📡 Querying {source_name}...")
+            for source_name, urls in working_sources.items():
+                sources_total += 1
+                source_found = False
 
                 for url in urls:
                     try:
@@ -2391,6 +2389,8 @@ async def run_comprehensive_passive_recon(domain: str, output_file: str) -> List
 
                         async with session.get(url, headers=headers, ssl=False) as response:
                             if response.status == 200:
+                                source_found = True
+
                                 if 'crt.sh' in url:
                                     data = await response.json()
                                     for entry in data:
@@ -2400,75 +2400,66 @@ async def run_comprehensive_passive_recon(domain: str, output_file: str) -> List
                                             if subdomain and is_valid_subdomain(subdomain, domain):
                                                 all_subdomains.add(subdomain.lower())
 
-                                elif 'bufferover' in url:
-                                    data = await response.json()
-                                    if 'FDNS_A' in data:
-                                        for record in data['FDNS_A']:
-                                            subdomain = record.split(',')[1] if ',' in record else record
+                                elif 'hackertarget' in url:
+                                    text = await response.text()
+                                    for line in text.split('\n'):
+                                        if ',' in line:
+                                            subdomain = line.split(',')[0].strip()
                                             if subdomain and is_valid_subdomain(subdomain, domain):
                                                 all_subdomains.add(subdomain.lower())
 
-                                elif 'archive.org' in url:
+                                elif 'rapiddns' in url:
                                     text = await response.text()
-                                    lines = text.split('\n')
-                                    for line in lines[1:]:  # Skip header
-                                        if line.strip():
-                                            try:
-                                                data = json.loads(line)
-                                                if len(data) > 0:
-                                                    url_part = data[0]
-                                                    if domain in url_part:
-                                                        # Extract subdomain from URL
-                                                        parsed = urlparse(url_part)
-                                                        if parsed.netloc and is_valid_subdomain(parsed.netloc, domain):
-                                                            all_subdomains.add(parsed.netloc.lower())
-                                            except:
-                                                continue
-
-                                elif 'alienvault' in url:
-                                    data = await response.json()
-                                    if 'passive_dns' in data:
-                                        for record in data['passive_dns']:
-                                            subdomain = record.get('hostname', '')
-                                            if subdomain and is_valid_subdomain(subdomain, domain):
-                                                all_subdomains.add(subdomain.lower())
-
-                                else:
-                                    # Generic text parsing for other sources
-                                    text = await response.text()
-                                    # Extract potential subdomains using regex
-                                    subdomain_pattern = rf'([a-zA-Z0-9]([a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9])?\.)*{re.escape(domain)}'
+                                    # Extract subdomains from HTML
+                                    subdomain_pattern = rf'([a-zA-Z0-9]([a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9])?\.)+{re.escape(domain)}'
                                     matches = re.findall(subdomain_pattern, text, re.IGNORECASE)
                                     for match in matches:
-                                        if isinstance(match, tuple):
-                                            subdomain = match[0] + domain
-                                        else:
-                                            subdomain = match
-                                        if subdomain and is_valid_subdomain(subdomain, domain):
-                                            all_subdomains.add(subdomain.lower())
+                                        if is_valid_subdomain(match, domain):
+                                            all_subdomains.add(match.lower())
 
-                            else:
-                                print(f"   ⚠️  {source_name} failed: HTTP {response.status}")
+                                elif 'subdomain.center' in url:
+                                    try:
+                                        data = await response.json()
+                                        if isinstance(data, list):
+                                            for subdomain in data:
+                                                if subdomain and is_valid_subdomain(subdomain, domain):
+                                                    all_subdomains.add(subdomain.lower())
+                                    except:
+                                        # Fallback to text parsing
+                                        text = await response.text()
+                                        subdomain_pattern = rf'([a-zA-Z0-9]([a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9])?\.)+{re.escape(domain)}'
+                                        matches = re.findall(subdomain_pattern, text, re.IGNORECASE)
+                                        for match in matches:
+                                            if is_valid_subdomain(match, domain):
+                                                all_subdomains.add(match.lower())
+
+                                break  # Success, no need to try other URLs for this source
 
                     except Exception as e:
-                        print(f"   ⚠️  {source_name} error: {str(e)[:50]}...")
-                        continue
+                        continue  # Try next URL
 
-                # Small delay between source categories
-                await asyncio.sleep(1)
+                if source_found:
+                    sources_successful += 1
+
+                # Small delay between sources
+                await asyncio.sleep(0.5)
 
         subdomain_list = list(all_subdomains)
 
         # Save results
         with open(output_file, 'w') as f:
-            for subdomain in subdomain_list:
+            f.write(f"# Passive Intelligence Results\n")
+            f.write(f"# Domain: {domain}\n")
+            f.write(f"# Sources successful: {sources_successful}/{sources_total}\n")
+            f.write(f"# Subdomains found: {len(subdomain_list)}\n\n")
+            for subdomain in sorted(subdomain_list):
                 f.write(f"{subdomain}\n")
 
-        print(f"   ✅ Comprehensive passive recon found {len(subdomain_list)} valid subdomains")
+        print(f"   ✅ Passive intelligence: {len(subdomain_list)} subdomains from {sources_successful}/{sources_total} sources")
         return subdomain_list
 
     except Exception as e:
-        print(f"   ❌ Comprehensive passive recon failed: {e}")
+        print(f"   ❌ Passive intelligence failed: {e}")
         return await run_basic_passive_recon(domain, output_file)
 
 
@@ -2940,17 +2931,8 @@ async def run_reconnaissance(domain: str):
     print(f"\n   📡 1.2: Comprehensive passive intelligence gathering...")
     progress_tracker.update_progress(4, 8, "Initializing passive sources...", len(all_subdomains))
 
-    # Show smart passive intelligence effects
-    passive_sources = [
-        "🔍 Querying Certificate Transparency databases...",
-        "🌐 Mining DNS aggregators and threat intelligence...",
-        "📚 Analyzing web archives and historical data...",
-        "🔎 Processing search engine intelligence..."
-    ]
-
-    for i, source_msg in enumerate(passive_sources):
-        print(f"   {source_msg}")
-        time.sleep(0.2)
+    # Smart passive intelligence with minimal output
+    print(f"   📡 Querying multiple intelligence sources...")
 
     # Run comprehensive passive recon with smart tracking
     passive_results = await run_comprehensive_passive_recon(domain, f"{directories['raw']}/passive_recon.txt")
@@ -3009,21 +2991,23 @@ async def run_reconnaissance(domain: str):
         if any(keyword in subdomain.lower() for keyword in ['app', 'staging', 'api', 'admin', 'dev']):
             print(f"   🎯 CRITICAL DNS DISCOVERY: {subdomain}")
 
-    progress_tracker.update_progress(8, 8, f"Smart DNS: {len(dns_bruteforce_results)} live found", len(all_subdomains))
     verbose_logger.success(f"Smart DNS brute-force completed", len(dns_bruteforce_results))
 
     # 1.5: Search Engine Intelligence
-    verbose_logger.info("🔎 1.5: Search engine intelligence preparation...")
-    verbose_logger.increase_indent()
+    print(f"\n   🔎 1.5: Search engine intelligence preparation...")
 
     # Prepare search engine dorking queries
     verbose_logger.info("Generating advanced search engine dorking queries...")
     search_results = await run_search_engine_dorking(domain, f"{directories['raw']}/search_dorking.txt")
     all_subdomains.extend(search_results)
     source_stats['Search Engine Intelligence'] = len(search_results)
-    verbose_logger.success(f"Search engine intelligence prepared", len(search_results))
 
-    verbose_logger.decrease_indent()
+    # Log discoveries
+    for subdomain in search_results:
+        progress_tracker.add_discovery(subdomain, 'Search Intelligence')
+        output_manager.log_discovery(subdomain, 'Search Intelligence')
+
+    verbose_logger.success(f"Search engine intelligence prepared", len(search_results))
 
     progress_tracker.end_phase()
 
@@ -3178,7 +3162,7 @@ async def run_reconnaissance(domain: str):
         json.dump(enhanced_report, f, indent=2)
 
     # Create smart final summary with comprehensive analysis
-    summary_file = output_manager.create_final_summary(enhanced_report)
+    output_manager.create_final_summary(enhanced_report)
 
     # Print enhanced results with smart formatting
     print(f"\n🎯 ULTRA-SMART RECONNAISSANCE COMPLETE - 99% COVERAGE ACHIEVED!")
