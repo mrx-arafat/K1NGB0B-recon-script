@@ -86,11 +86,13 @@ check_all_dependencies() {
         fi
     done
 
-    # Check Python package
+    # Check Python packages
     if command_exists python3; then
-        if ! python3 -c "import aiohttp" 2>/dev/null; then
-            missing+=("aiohttp")
-        fi
+        for package in aiohttp dnspython psutil requests; do
+            if ! python3 -c "import $package" 2>/dev/null; then
+                missing+=("$package")
+            fi
+        done
     fi
 
     if [ ${#missing[@]} -eq 0 ]; then
@@ -141,7 +143,7 @@ install_python_deps() {
     # Method 1: Try pip install with --user flag
     if command_exists pip3; then
         print_progress "Attempting pip3 install with --user flag..."
-        if pip3 install --user aiohttp 2>/dev/null; then
+        if pip3 install --user aiohttp dnspython psutil requests 2>/dev/null; then
             install_success=true
             print_success "Python packages installed via pip3 --user"
         fi
@@ -150,7 +152,7 @@ install_python_deps() {
     # Method 2: Try pip install with --break-system-packages (for newer systems)
     if [ "$install_success" = false ] && command_exists pip3; then
         print_progress "Attempting pip3 install with --break-system-packages..."
-        if pip3 install --break-system-packages aiohttp 2>/dev/null; then
+        if pip3 install --break-system-packages aiohttp dnspython psutil requests 2>/dev/null; then
             install_success=true
             print_success "Python packages installed via pip3 --break-system-packages"
         fi
@@ -174,7 +176,7 @@ install_python_deps() {
             python3 -m venv venv_k1ngb0b 2>/dev/null || true
             if [ -f "venv_k1ngb0b/bin/activate" ]; then
                 source venv_k1ngb0b/bin/activate
-                pip install aiohttp
+                pip install aiohttp dnspython psutil requests
                 deactivate
                 install_success=true
                 print_success "Python packages installed in virtual environment"
@@ -185,7 +187,7 @@ install_python_deps() {
 
     if [ "$install_success" = false ]; then
         print_error "Failed to install Python dependencies!"
-        print_info "Please try manually: pip3 install --user aiohttp"
+        print_info "Please try manually: pip3 install --user aiohttp dnspython psutil requests"
         exit 1
     fi
 }
@@ -217,6 +219,12 @@ install_go_tools() {
         "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest:subfinder"
         "github.com/projectdiscovery/httpx/cmd/httpx@latest:httpx"
         "github.com/tomnomnom/anew@latest:anew"
+        "github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest:nuclei"
+        "github.com/ffuf/ffuf@latest:ffuf"
+        "github.com/tomnomnom/waybackurls@latest:waybackurls"
+        "github.com/lc/gau@latest:gau"
+        "github.com/sensepost/gowitness@latest:gowitness"
+        "github.com/owasp-amass/amass/v4/...@master:amass"
     )
 
     for tool_info in "${tools[@]}"; do
@@ -258,6 +266,44 @@ install_go_tools() {
     print_success "All reconnaissance tools installed"
 }
 
+# Install additional tools and setup
+install_additional_tools() {
+    print_step "Installing additional tools and setup..."
+
+    # Install system tools for enhanced functionality
+    if command_exists apt-get; then
+        print_progress "Installing additional system tools..."
+        sudo apt-get install -y gobuster dirb 2>/dev/null || print_warning "Some additional tools may not be available"
+    fi
+
+    # Install ParamSpider for parameter discovery
+    print_progress "Installing ParamSpider..."
+    if command_exists pip3; then
+        pip3 install --user paramspider 2>/dev/null || pip3 install --break-system-packages paramspider 2>/dev/null || print_warning "ParamSpider installation failed"
+        print_success "ParamSpider installed for parameter discovery"
+    fi
+
+    # Update Nuclei templates
+    export PATH=$PATH:$(go env GOPATH 2>/dev/null)/bin 2>/dev/null || true
+    if command_exists nuclei; then
+        print_progress "Updating Nuclei templates..."
+        nuclei -update-templates -silent 2>/dev/null || print_warning "Nuclei template update failed"
+        print_success "Nuclei templates updated"
+    fi
+
+    # Create wordlists directory for SecLists cache
+    print_progress "Setting up wordlists directory..."
+    mkdir -p ./wordlists
+    print_info "Created wordlists directory for SecLists cache"
+
+    # Setup wordlists directory
+    if [ ! -d "/usr/share/wordlists" ]; then
+        sudo mkdir -p /usr/share/wordlists 2>/dev/null || true
+    fi
+
+    print_success "Additional tools and setup completed"
+}
+
 # Verify installation
 verify_installation() {
     print_step "Verifying installation..."
@@ -268,32 +314,42 @@ verify_installation() {
     # Update PATH for verification
     export PATH=$PATH:$(go env GOPATH 2>/dev/null)/bin 2>/dev/null || true
 
-    # Check Python
+    # Check Python packages
     print_progress "Checking Python dependencies..."
-    if ! python3 -c "import aiohttp" 2>/dev/null; then
-        # Try alternative import methods
-        if python3 -c "import sys; sys.path.append('$HOME/.local/lib/python*/site-packages'); import aiohttp" 2>/dev/null; then
-            print_success "Python dependencies OK (user installation)"
-        elif [ -f "venv_k1ngb0b/bin/activate" ]; then
-            source venv_k1ngb0b/bin/activate
-            if python3 -c "import aiohttp" 2>/dev/null; then
-                print_success "Python dependencies OK (virtual environment)"
-                deactivate
+    local python_packages=("aiohttp" "dnspython" "psutil" "requests")
+    local python_failed=false
+
+    for package in "${python_packages[@]}"; do
+        if ! python3 -c "import $package" 2>/dev/null; then
+            # Try alternative import methods
+            if python3 -c "import sys; sys.path.append('$HOME/.local/lib/python*/site-packages'); import $package" 2>/dev/null; then
+                continue
+            elif [ -f "venv_k1ngb0b/bin/activate" ]; then
+                source venv_k1ngb0b/bin/activate
+                if python3 -c "import $package" 2>/dev/null; then
+                    deactivate
+                    continue
+                else
+                    deactivate
+                    print_error "Python $package package not found"
+                    python_failed=true
+                fi
             else
-                print_error "Python aiohttp package not found"
-                failed=true
+                print_error "Python $package package not found"
+                python_failed=true
             fi
-        else
-            print_error "Python aiohttp package not found"
-            failed=true
         fi
-    else
+    done
+
+    if [ "$python_failed" = false ]; then
         print_success "Python dependencies OK"
+    else
+        failed=true
     fi
 
     # Check Go tools
     print_progress "Checking reconnaissance tools..."
-    local tools=("assetfinder" "subfinder" "httpx" "anew")
+    local tools=("assetfinder" "subfinder" "httpx" "anew" "nuclei" "ffuf" "waybackurls" "gau" "gowitness")
     for tool in "${tools[@]}"; do
         if command_exists "$tool"; then
             # Test tool functionality
@@ -394,6 +450,10 @@ main() {
     install_go_tools
     echo
 
+    # Install additional tools and setup
+    install_additional_tools
+    echo
+
     # Verify installation
     verify_installation
     echo
@@ -405,13 +465,29 @@ main() {
     print_info "2. Run the tool: python3 k1ngb0b_recon.py"
     print_info "3. Enter a domain when prompted (e.g., example.com)"
     echo
-    print_info "📚 Tool capabilities:"
-    print_info "• Subdomain enumeration (assetfinder, subfinder)"
-    print_info "• HTTP probing (httpx)"
-    print_info "• Result deduplication (anew)"
-    print_info "• Async processing for speed"
+    print_info "📚 Enhanced Tool Capabilities:"
+    print_info "🔍 Core Reconnaissance:"
+    print_info "  • Multi-source subdomain enumeration (AssetFinder, Subfinder, Amass)"
+    print_info "  • Certificate Transparency lookup"
+    print_info "  • Smart wordlist-based enumeration with SecLists"
+    print_info "  • HTTP probing with technology detection (httpx)"
+    print_info "  • DNS analysis and port scanning"
     echo
-    print_success "Happy hunting! 🔥"
+    print_info "🔥 Advanced Analysis (k1ngb0b_after_recon.py):"
+    print_info "  • Vulnerability scanning (Nuclei)"
+    print_info "  • Smart directory enumeration (FFUF, Gobuster)"
+    print_info "  • API endpoint discovery with context-aware wordlists"
+    print_info "  • URL discovery (Waybackurls, GAU)"
+    print_info "  • Parameter discovery (ParamSpider)"
+    print_info "  • Screenshot capture (Gowitness)"
+    echo
+    print_info "🧠 Smart Features:"
+    print_info "  • SecLists integration - Downloads only needed wordlists"
+    print_info "  • Technology-specific testing (WordPress, APIs, etc.)"
+    print_info "  • Concurrent processing with rate limiting"
+    print_info "  • Comprehensive JSON reporting"
+    echo
+    print_success "Happy hunting with enhanced intelligence! 🔥🧠"
 }
 
 # Trap to handle script interruption

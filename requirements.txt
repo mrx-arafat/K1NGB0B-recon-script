@@ -1,2 +1,10 @@
-# Essential dependencies for K1NGB0B Recon Script
+# Essential dependencies for K1NGB0B Professional Recon Script
+# Core HTTP and DNS libraries
 aiohttp>=3.8.0
+dnspython>=2.3.0
+
+# Process management and system utilities
+psutil>=5.9.0
+
+# Optional but recommended for enhanced functionality
+requests>=2.28.0
