@@ -334,6 +334,13 @@ python3 k1ngb0b_recon.py
    🔗 Unique validated: 1,234 subdomains
    🎯 Critical identified: 23 subdomains
    🟢 Live confirmed: 156 subdomains
+
+   📊 Status Code Breakdown:
+      🟢 200: 89 subdomains
+      🔄 301: 23 subdomains
+      🔄 302: 12 subdomains
+      ⚠️ 403: 18 subdomains
+      ⚠️ 404: 14 subdomains
 ```
 
 **🎯 STAGE 1 Features:**
@@ -343,7 +350,9 @@ python3 k1ngb0b_recon.py
 - ✅ **Smart Pattern Generation**: Domain-specific intelligent permutations
 - ✅ **Real-Time Progress**: Live ETA calculations and success tracking
 - ✅ **99% Coverage Validation**: Mandatory testing of critical patterns
-- ✅ **Live Subdomain Validation**: httpx integration for live verification
+- ✅ **Complete HTTP Status Analysis**: Captures ALL status codes (200, 301, 302, 307, 403, 404, 500, etc.)
+- ✅ **Redirect Following**: Automatically follows redirects to discover additional infrastructure
+- ✅ **Live Subdomain Validation**: httpx integration with comprehensive status code reporting
 - ✅ **Professional JSON Reporting**: Comprehensive results and analytics
 
 ### 🚨 STAGE 2: Advanced Post-Reconnaissance Analysis

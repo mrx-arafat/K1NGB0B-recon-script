@@ -2597,11 +2597,13 @@ async def check_live_subdomains_advanced(subdomains: List[str], directories: Dic
             for subdomain in subdomains:
                 f.write(f"{subdomain}\n")
 
-        # Enhanced httpx command with more options
+        # Enhanced httpx command with ALL status codes (including redirects)
         command = [
             'httpx', '-list', temp_file, '-o', httpx_output,
             '-silent', '-status-code', '-title', '-tech-detect',
-            '-threads', '50', '-timeout', '10'
+            '-threads', '50', '-timeout', '10',
+            '-mc', '200,201,202,204,301,302,303,307,308,400,401,403,404,405,500,502,503',
+            '-follow-redirects', '-location'
         ]
 
         success, output, error = run_command(command, timeout=600)
@@ -2614,10 +2616,29 @@ async def check_live_subdomains_advanced(subdomains: List[str], directories: Dic
 
         if success:
             try:
+                status_counts = {}
                 with open(httpx_output, 'r') as f:
                     for line in f:
                         if line.strip():
-                            live_subdomains.append(line.strip().split()[0])
+                            parts = line.strip().split()
+                            if len(parts) >= 2:
+                                url = parts[0]
+                                status_code = parts[1].strip('[]')
+                                live_subdomains.append(url)
+
+                                # Count status codes for reporting
+                                if status_code in status_counts:
+                                    status_counts[status_code] += 1
+                                else:
+                                    status_counts[status_code] = 1
+
+                # Display status code breakdown
+                if status_counts:
+                    print(f"   📊 Status Code Breakdown:")
+                    for status, count in sorted(status_counts.items()):
+                        status_type = "🟢" if status.startswith('2') else "🔄" if status.startswith('3') else "⚠️" if status.startswith('4') else "❌"
+                        print(f"      {status_type} {status}: {count} subdomains")
+
             except Exception as e:
                 print(f"   ⚠️  Failed to read httpx output: {e}")
 
@@ -2704,7 +2725,9 @@ def check_live_subdomains(subdomains: List[str], output_file: str) -> List[str]:
             f.write(f"{subdomain}\n")
 
     success, output, error = run_command([
-        'httpx', '-list', temp_file, '-o', output_file, '-silent'
+        'httpx', '-list', temp_file, '-o', output_file, '-silent',
+        '-status-code', '-mc', '200,201,202,204,301,302,303,307,308,400,401,403,404,405,500,502,503',
+        '-follow-redirects', '-location'
     ])
 
     # Clean up temp file
@@ -2715,12 +2738,39 @@ def check_live_subdomains(subdomains: List[str], output_file: str) -> List[str]:
 
     if success:
         try:
+            live_subdomains = []
+            status_counts = {}
+
             with open(output_file, 'r') as f:
-                live_subdomains = [line.strip() for line in f if line.strip()]
+                for line in f:
+                    if line.strip():
+                        parts = line.strip().split()
+                        if len(parts) >= 2:
+                            url = parts[0]
+                            status_code = parts[1].strip('[]')
+                            live_subdomains.append(url)
+
+                            # Count status codes
+                            if status_code in status_counts:
+                                status_counts[status_code] += 1
+                            else:
+                                status_counts[status_code] = 1
+                        else:
+                            # Fallback for simple format
+                            live_subdomains.append(line.strip())
+
             print(f"   ✅ Found {len(live_subdomains)} live subdomains")
+
+            # Display status code breakdown if available
+            if status_counts:
+                print(f"   📊 Status Code Breakdown:")
+                for status, count in sorted(status_counts.items()):
+                    status_type = "🟢" if status.startswith('2') else "🔄" if status.startswith('3') else "⚠️" if status.startswith('4') else "❌"
+                    print(f"      {status_type} {status}: {count} subdomains")
+
             return live_subdomains
-        except:
-            print("   ❌ Failed to read output file")
+        except Exception as e:
+            print(f"   ❌ Failed to read output file: {e}")
             return []
     else:
         print(f"   ❌ Failed: {error}")
