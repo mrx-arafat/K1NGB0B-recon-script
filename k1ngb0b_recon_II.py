@@ -722,6 +722,120 @@ async def run_url_discovery(domain: str, output_dir: str, timeout_manager: Profe
         print("   ⚠️  GAU not found")
         print("   📝 Manual installation: go install github.com/lc/gau@latest")
 
+    # Run waymore (enhanced URL discovery)
+    if check_tool('waymore'):
+        print("   🔍 Running waymore (enhanced URL discovery)...")
+        if timeout_manager:
+            success, output, error = timeout_manager.run_with_timeout(
+                ['waymore', '-i', domain, '--no-subs'], 300, f"Waymore for {domain}"
+            )
+        else:
+            success, output, error = run_command(['waymore', '-i', domain, '--no-subs'], timeout=300)
+
+        if success and output:
+            urls = [line.strip() for line in output.split('\n') if line.strip()]
+            all_urls.update(urls)
+            print(f"   ✅ Waymore found {len(urls)} URLs")
+        elif not success and "timeout" in error.lower():
+            print(f"   ⏰ Waymore timed out for {domain}")
+            print(f"   💡 Manual command: waymore -i {domain} --no-subs")
+    else:
+        print("   ⚠️  Waymore not found")
+        print("   📝 Manual installation: go install github.com/xnl-h4ck3r/waymore@latest")
+
+    # Run katana for deep crawling
+    if check_tool('katana'):
+        print("   🔍 Running katana (deep crawling)...")
+        if timeout_manager:
+            success, output, error = timeout_manager.run_with_timeout(
+                ['katana', '-u', f'https://{domain}', '-d', '3', '-silent'], 300, f"Katana for {domain}"
+            )
+        else:
+            success, output, error = run_command(['katana', '-u', f'https://{domain}', '-d', '3', '-silent'], timeout=300)
+
+        if success and output:
+            urls = [line.strip() for line in output.split('\n') if line.strip()]
+            all_urls.update(urls)
+            print(f"   ✅ Katana found {len(urls)} URLs")
+        elif not success and "timeout" in error.lower():
+            print(f"   ⏰ Katana timed out for {domain}")
+            print(f"   💡 Manual command: katana -u https://{domain} -d 3 -silent")
+    else:
+        print("   ⚠️  Katana not found")
+        print("   📝 Manual installation: go install github.com/projectdiscovery/katana/cmd/katana@latest")
+
+    # Run hakrawler for additional crawling
+    if check_tool('hakrawler'):
+        print("   🔍 Running hakrawler...")
+        if timeout_manager:
+            success, output, error = timeout_manager.run_with_timeout(
+                ['hakrawler', '-url', f'https://{domain}', '-depth', '2'], 240, f"Hakrawler for {domain}"
+            )
+        else:
+            success, output, error = run_command(['hakrawler', '-url', f'https://{domain}', '-depth', '2'], timeout=240)
+
+        if success and output:
+            urls = [line.strip() for line in output.split('\n') if line.strip()]
+            all_urls.update(urls)
+            print(f"   ✅ Hakrawler found {len(urls)} URLs")
+        elif not success and "timeout" in error.lower():
+            print(f"   ⏰ Hakrawler timed out for {domain}")
+            print(f"   💡 Manual command: hakrawler -url https://{domain} -depth 2")
+    else:
+        print("   ⚠️  Hakrawler not found")
+        print("   📝 Manual installation: go install github.com/hakluke/hakrawler@latest")
+
+    # Run getJS for JavaScript file discovery
+    if check_tool('getJS'):
+        print("   🔍 Running getJS (JavaScript discovery)...")
+        if timeout_manager:
+            success, output, error = timeout_manager.run_with_timeout(
+                ['getJS', '--url', f'https://{domain}'], 180, f"GetJS for {domain}"
+            )
+        else:
+            success, output, error = run_command(['getJS', '--url', f'https://{domain}'], timeout=180)
+
+        if success and output:
+            js_urls = [line.strip() for line in output.split('\n') if line.strip() and '.js' in line]
+            all_urls.update(js_urls)
+            print(f"   ✅ GetJS found {len(js_urls)} JS files")
+        elif not success and "timeout" in error.lower():
+            print(f"   ⏰ GetJS timed out for {domain}")
+            print(f"   💡 Manual command: getJS --url https://{domain}")
+    else:
+        print("   ⚠️  GetJS not found")
+        print("   📝 Manual installation: go install github.com/003random/getJS@latest")
+
+    # Deduplicate URLs using uro if available
+    if check_tool('uro') and all_urls:
+        print("   🔍 Deduplicating URLs with uro...")
+        try:
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+                for url in all_urls:
+                    f.write(f"{url}\n")
+                temp_file = f.name
+
+            success, output, error = run_command(['uro', '-i', temp_file], timeout=60)
+            if success and output:
+                deduplicated_urls = set()
+                for url in output.split('\n'):
+                    if url.strip():
+                        deduplicated_urls.add(url.strip())
+                original_count = len(all_urls)
+                all_urls = deduplicated_urls
+                print(f"   ✅ URO deduplication: {original_count} → {len(all_urls)} URLs")
+
+            import os
+            os.unlink(temp_file)
+
+        except Exception as e:
+            print(f"   ❌ URO deduplication failed: {e}")
+    else:
+        if not check_tool('uro'):
+            print("   ⚠️  URO not found - URL deduplication SKIPPED")
+            print("   📝 Manual installation: go install github.com/s0md3v/uro@latest")
+
     # Save URLs
     if all_urls:
         url_file = os.path.join(output_dir, "discovered_urls.txt")
@@ -1052,16 +1166,47 @@ def check_dependencies() -> tuple:
     required = []
     optional = []
 
-    # Optional but recommended tools
+    # Optional but recommended tools - Enhanced with 25 Smart Bug Bounty Tools
     tools = {
+        # Critical Analysis Tools
         'nuclei': 'Nuclei (Vulnerability scanner)',
         'ffuf': 'FFUF (Web fuzzer)',
+        'httpx': 'HTTPX (HTTP probing)',
+
+        # Directory & Content Discovery
         'gobuster': 'Gobuster (Directory brute-forcer)',
-        'gowitness': 'Gowitness (Screenshot tool)',
-        'aquatone': 'Aquatone (Screenshot tool)',
+        'katana': 'Katana (High-speed crawler)',
+        'hakrawler': 'Hakrawler (Web crawler)',
+
+        # URL & Parameter Discovery
         'waybackurls': 'Waybackurls (URL discovery)',
         'gau': 'GetAllUrls (URL discovery)',
-        'paramspider': 'ParamSpider (Parameter discovery)'
+        'waymore': 'Waymore (Enhanced URL discovery)',
+        'arjun': 'Arjun (Parameter discovery)',
+        'paramspider': 'ParamSpider (Parameter discovery)',
+        'getJS': 'GetJS (Extract JS links)',
+
+        # Screenshot & Visual
+        'gowitness': 'Gowitness (Screenshot tool)',
+        'aquatone': 'Aquatone (Screenshot tool)',
+
+        # URL Manipulation & Filtering
+        'qsreplace': 'QSReplace (Query string replacement)',
+        'uro': 'URO (URL deduplicator)',
+        'anew': 'Anew (Line deduplication)',
+
+        # Intelligence & Search
+        'uncover': 'Uncover (Search via Shodan, Censys)',
+        'metabigor': 'Metabigor (Intelligence gathering)',
+
+        # Network & Infrastructure
+        'naabu': 'Naabu (Fast port scanner)',
+        'dnsx': 'DNSX (DNS resolver)',
+        'mapcidr': 'MapCIDR (IP/CIDR manipulation)',
+
+        # Pattern Matching & Notification
+        'gf': 'GF (Pattern matching)',
+        'notify': 'Notify (Send results to Discord/Slack)'
     }
 
     for tool, description in tools.items():

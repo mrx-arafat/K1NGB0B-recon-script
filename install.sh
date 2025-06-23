@@ -160,9 +160,9 @@ check_all_dependencies() {
         fi
     done
 
-    # Check reconnaissance tools (with PATH update)
+    # Check reconnaissance tools (with PATH update) - Critical tools only for dependency check
     export PATH=$PATH:$(go env GOPATH 2>/dev/null)/bin 2>/dev/null || true
-    for tool in assetfinder subfinder httpx anew; do
+    for tool in assetfinder subfinder httpx anew nuclei; do
         if ! command_exists "$tool"; then
             missing+=("$tool")
         fi
@@ -296,19 +296,45 @@ install_go_tools() {
     export PATH=$PATH:/usr/local/go/bin:$gopath/bin
     print_progress "Go environment configured (GOPATH: $gopath)"
 
-    # Enhanced tools list with priority and fallback options
+    # Enhanced tools list with priority and fallback options - 25 Smart Go-Based Bug Bounty Recon Tools
     local tools=(
-        "github.com/tomnomnom/assetfinder@latest:assetfinder:high"
-        "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest:subfinder:high"
-        "github.com/projectdiscovery/httpx/cmd/httpx@latest:httpx:high"
+        # 🧭 Subdomain Enumeration & DNS (Critical Priority)
+        "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest:subfinder:critical"
+        "github.com/tomnomnom/assetfinder@latest:assetfinder:critical"
+        "github.com/owasp-amass/amass/v4/cmd/amass@latest:amass:high"
+        "github.com/findomain/findomain@latest:findomain:high"
+        "github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest:shuffledns:high"
+        "github.com/projectdiscovery/dnsx/cmd/dnsx@latest:dnsx:high"
+        "github.com/vortexau/dnsvalidator@latest:dnsvalidator:medium"
+        "github.com/d3mondev/puredns/v2@latest:puredns:high"
+
+        # 🌐 HTTP Probing & Endpoint Discovery (Critical Priority)
+        "github.com/projectdiscovery/httpx/cmd/httpx@latest:httpx:critical"
+        "github.com/projectdiscovery/katana/cmd/katana@latest:katana:high"
+        "github.com/lc/gau/v2/cmd/gau@latest:gau:high"
+        "github.com/xnl-h4ck3r/waymore@latest:waymore:high"
+        "github.com/hakluke/hakrawler@latest:hakrawler:medium"
+        "github.com/003random/getJS@latest:getJS:medium"
+        "github.com/s0md3v/Arjun@latest:arjun:medium"
+
+        # 🔎 Search & Intelligence (High Priority)
+        "github.com/projectdiscovery/uncover/cmd/uncover@latest:uncover:high"
+        "github.com/cgboal/sonarsearch/cmd/crobat@latest:crobat:medium"
+        "github.com/j3ssie/metabigor@latest:metabigor:medium"
+        "github.com/projectdiscovery/naabu/v2/cmd/naabu@latest:naabu:high"
+
+        # 📦 URL Manipulation, Fuzzing, Filtering (Medium Priority)
+        "github.com/tomnomnom/qsreplace@latest:qsreplace:medium"
+        "github.com/ffuf/ffuf/v2@latest:ffuf:high"
+        "github.com/s0md3v/uro@latest:uro:medium"
+        "github.com/projectdiscovery/mapcidr/cmd/mapcidr@latest:mapcidr:medium"
         "github.com/tomnomnom/anew@latest:anew:high"
+        "github.com/projectdiscovery/notify/cmd/notify@latest:notify:medium"
+
+        # 🛡️ Vulnerability & Security (Critical Priority)
         "github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest:nuclei:critical"
-        "github.com/ffuf/ffuf/v2@latest:ffuf:medium"
         "github.com/tomnomnom/waybackurls@latest:waybackurls:medium"
-        "github.com/lc/gau/v2/cmd/gau@latest:gau:medium"
-        "github.com/projectdiscovery/katana/cmd/katana@latest:katana:medium"
-        "github.com/projectdiscovery/naabu/v2/cmd/naabu@latest:naabu:medium"
-        "github.com/tomnomnom/gf@latest:gf:low"
+        "github.com/tomnomnom/gf@latest:gf:medium"
         "github.com/1ndianl33t/Gf-Patterns@latest:gf-patterns:low"
     )
 
@@ -534,21 +560,61 @@ verify_installation() {
         failed=true
     fi
 
-    # Check Go tools
+    # Check Go tools - 25 Smart Bug Bounty Recon Tools
     print_progress "Checking reconnaissance tools..."
-    local tools=("assetfinder" "subfinder" "httpx" "anew" "nuclei" "ffuf" "waybackurls" "gau" "gowitness")
-    for tool in "${tools[@]}"; do
+    local critical_tools=("subfinder" "assetfinder" "httpx" "nuclei")
+    local high_priority_tools=("amass" "findomain" "shuffledns" "dnsx" "puredns" "katana" "gau" "waymore" "uncover" "naabu" "ffuf" "anew")
+    local medium_priority_tools=("dnsvalidator" "hakrawler" "getJS" "arjun" "crobat" "metabigor" "qsreplace" "uro" "mapcidr" "notify" "waybackurls" "gf")
+    local low_priority_tools=("gf-patterns")
+
+    # Check critical tools first
+    print_progress "Checking critical tools..."
+    for tool in "${critical_tools[@]}"; do
         if command_exists "$tool"; then
-            # Test tool functionality
-            if "$tool" --help >/dev/null 2>&1 || "$tool" -h >/dev/null 2>&1; then
-                print_success "$tool OK"
+            if "$tool" --help >/dev/null 2>&1 || "$tool" -h >/dev/null 2>&1 || "$tool" -version >/dev/null 2>&1; then
+                print_success "$tool OK (Critical)"
             else
-                print_warning "$tool found but may not be working correctly"
+                print_warning "$tool found but may not be working correctly (Critical)"
                 warnings=true
             fi
         else
-            print_error "$tool not found in PATH"
+            print_error "$tool not found in PATH (Critical)"
             failed=true
+        fi
+    done
+
+    # Check high priority tools
+    print_progress "Checking high priority tools..."
+    for tool in "${high_priority_tools[@]}"; do
+        if command_exists "$tool"; then
+            if "$tool" --help >/dev/null 2>&1 || "$tool" -h >/dev/null 2>&1 || "$tool" -version >/dev/null 2>&1; then
+                print_success "$tool OK (High)"
+            else
+                print_warning "$tool found but may not be working correctly (High)"
+                warnings=true
+            fi
+        else
+            print_warning "$tool not found in PATH (High priority)"
+            warnings=true
+        fi
+    done
+
+    # Check medium priority tools
+    print_progress "Checking medium priority tools..."
+    for tool in "${medium_priority_tools[@]}"; do
+        if command_exists "$tool"; then
+            print_success "$tool OK (Medium)"
+        else
+            print_info "$tool not found (Medium priority - optional)"
+        fi
+    done
+
+    # Check low priority tools
+    for tool in "${low_priority_tools[@]}"; do
+        if command_exists "$tool"; then
+            print_success "$tool OK (Low)"
+        else
+            print_info "$tool not found (Low priority - optional)"
         fi
     done
 

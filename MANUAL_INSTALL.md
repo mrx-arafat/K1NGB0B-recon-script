@@ -16,12 +16,14 @@ This guide provides step-by-step manual installation instructions for K1NGB0B v4
 ## 📋 Prerequisites
 
 ### System Requirements
+
 - Linux-based operating system (Ubuntu, Debian, CentOS, Arch, etc.)
 - Internet connectivity
 - Root or sudo access
 - At least 2GB free disk space
 
 ### Required Software Versions
+
 - **Python**: 3.8 or higher
 - **Go**: 1.21 or higher (1.23+ recommended)
 - **Git**: Any recent version
@@ -32,6 +34,7 @@ This guide provides step-by-step manual installation instructions for K1NGB0B v4
 ## 🔧 Step 1: Install System Dependencies
 
 ### Ubuntu/Debian Systems
+
 ```bash
 # Update package lists
 sudo apt update
@@ -48,6 +51,7 @@ source ~/.bashrc
 ```
 
 ### CentOS/RHEL/Fedora Systems
+
 ```bash
 # For CentOS/RHEL (yum)
 sudo yum install -y python3 python3-pip curl wget git
@@ -64,6 +68,7 @@ source ~/.bashrc
 ```
 
 ### Arch Linux
+
 ```bash
 # Install dependencies
 sudo pacman -Sy --noconfirm python python-pip curl wget git go
@@ -77,21 +82,25 @@ go version
 ## 🐍 Step 2: Install Python Dependencies
 
 ### Method 1: Standard pip installation
+
 ```bash
 pip3 install aiohttp dnspython psutil requests
 ```
 
 ### Method 2: User installation (if system packages conflict)
+
 ```bash
 pip3 install --user aiohttp dnspython psutil requests
 ```
 
 ### Method 3: Break system packages (Ubuntu 24.04+)
+
 ```bash
 pip3 install --break-system-packages aiohttp dnspython psutil requests
 ```
 
 ### Method 4: Virtual environment (recommended for development)
+
 ```bash
 python3 -m venv k1ngb0b_env
 source k1ngb0b_env/bin/activate
@@ -100,6 +109,7 @@ pip install aiohttp dnspython psutil requests
 ```
 
 ### Method 5: System packages (Ubuntu/Debian)
+
 ```bash
 sudo apt install -y python3-aiohttp python3-dnspython python3-psutil python3-requests
 ```
@@ -109,6 +119,7 @@ sudo apt install -y python3-aiohttp python3-dnspython python3-psutil python3-req
 ## 🛠️ Step 3: Install Go Reconnaissance Tools
 
 ### Configure Go Environment
+
 ```bash
 # Set up Go paths
 export PATH=$PATH:/usr/local/go/bin
@@ -120,69 +131,152 @@ echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### Core Tools (Install one by one)
-```bash
-# Essential subdomain enumeration
-echo "Installing AssetFinder..."
-go install github.com/tomnomnom/assetfinder@latest
+### Core Tools - 25 Smart Go-Based Bug Bounty Recon Tools
 
+```bash
+# 🧭 Subdomain Enumeration & DNS (Critical Priority)
 echo "Installing Subfinder..."
 go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
 
-# HTTP probing and analysis
-echo "Installing httpx..."
+echo "Installing AssetFinder..."
+go install github.com/tomnomnom/assetfinder@latest
+
+echo "Installing Amass..."
+go install github.com/owasp-amass/amass/v4/cmd/amass@latest
+
+echo "Installing Findomain..."
+go install github.com/findomain/findomain@latest
+
+echo "Installing ShuffleDNS..."
+go install github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest
+
+echo "Installing DNSX..."
+go install github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+
+echo "Installing DNSValidator..."
+go install github.com/vortexau/dnsvalidator@latest
+
+echo "Installing PureDNS..."
+go install github.com/d3mondev/puredns/v2@latest
+
+# 🌐 HTTP Probing & Endpoint Discovery (Critical Priority)
+echo "Installing HTTPX..."
 go install github.com/projectdiscovery/httpx/cmd/httpx@latest
 
-# Utility tools
-echo "Installing anew (deduplication)..."
+echo "Installing Katana..."
+go install github.com/projectdiscovery/katana/cmd/katana@latest
+
+echo "Installing GAU..."
+go install github.com/lc/gau/v2/cmd/gau@latest
+
+echo "Installing Waymore..."
+go install github.com/xnl-h4ck3r/waymore@latest
+
+echo "Installing Hakrawler..."
+go install github.com/hakluke/hakrawler@latest
+
+echo "Installing GetJS..."
+go install github.com/003random/getJS@latest
+
+echo "Installing Arjun..."
+go install github.com/s0md3v/Arjun@latest
+
+# 🔎 Search & Intelligence (High Priority)
+echo "Installing Uncover..."
+go install github.com/projectdiscovery/uncover/cmd/uncover@latest
+
+echo "Installing Crobat..."
+go install github.com/cgboal/sonarsearch/cmd/crobat@latest
+
+echo "Installing Metabigor..."
+go install github.com/j3ssie/metabigor@latest
+
+echo "Installing Naabu..."
+go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+
+# 📦 URL Manipulation, Fuzzing, Filtering (Medium Priority)
+echo "Installing QSReplace..."
+go install github.com/tomnomnom/qsreplace@latest
+
+echo "Installing FFUF..."
+go install github.com/ffuf/ffuf/v2@latest
+
+echo "Installing URO..."
+go install github.com/s0md3v/uro@latest
+
+echo "Installing MapCIDR..."
+go install github.com/projectdiscovery/mapcidr/cmd/mapcidr@latest
+
+echo "Installing Anew..."
 go install github.com/tomnomnom/anew@latest
 
-# Vulnerability scanner (CRITICAL)
+echo "Installing Notify..."
+go install github.com/projectdiscovery/notify/cmd/notify@latest
+
+# 🛡️ Vulnerability & Security (Critical Priority)
 echo "Installing Nuclei..."
 go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
 
-# Web fuzzing
-echo "Installing ffuf..."
-go install github.com/ffuf/ffuf/v2@latest
-
-# URL discovery
-echo "Installing waybackurls..."
+echo "Installing Waybackurls..."
 go install github.com/tomnomnom/waybackurls@latest
 
-echo "Installing gau..."
-go install github.com/lc/gau/v2/cmd/gau@latest
-
-# Web crawling
-echo "Installing katana..."
-go install github.com/projectdiscovery/katana/cmd/katana@latest
-
-# Port scanning
-echo "Installing naabu..."
-go install github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
-
-# Pattern matching
-echo "Installing gf..."
+echo "Installing GF..."
 go install github.com/tomnomnom/gf@latest
 
-echo "Installing gf-patterns..."
+echo "Installing GF-Patterns..."
 go install github.com/1ndianl33t/Gf-Patterns@latest
 ```
 
-### Verify Tool Installation
+### Verify Tool Installation - 25 Smart Bug Bounty Tools
+
 ```bash
-# Test each tool
-echo "Verifying installations..."
-assetfinder --help
+# Test critical tools first
+echo "Verifying critical tools..."
 subfinder --help
+assetfinder --help
 httpx --help
-anew --help
 nuclei --help
-ffuf --help
-waybackurls --help
-gau --help
+anew --help
+
+# Test subdomain enumeration tools
+echo "Verifying subdomain enumeration tools..."
+amass --help
+findomain --help
+shuffledns --help
+dnsx --help
+dnsvalidator --help
+puredns --help
+
+# Test HTTP probing & endpoint discovery
+echo "Verifying HTTP probing tools..."
 katana --help
+gau --help
+waymore --help
+hakrawler --help
+getJS --help
+arjun --help
+
+# Test search & intelligence tools
+echo "Verifying search & intelligence tools..."
+uncover --help
+crobat --help
+metabigor --help
 naabu --help
+
+# Test URL manipulation & fuzzing tools
+echo "Verifying URL manipulation tools..."
+qsreplace --help
+ffuf --help
+uro --help
+mapcidr --help
+notify --help
+
+# Test legacy tools
+echo "Verifying legacy tools..."
+waybackurls --help
 gf --help
+
+echo "✅ All 25 smart bug bounty tools verified!"
 ```
 
 ---
@@ -202,6 +296,7 @@ nuclei -templates nuclei-templates/ -list
 ## 🧪 Step 5: Test K1NGB0B v4.0 Smart Features
 
 ### Quick Smart Test
+
 ```bash
 # Navigate to K1NGB0B directory
 cd /path/to/K1NGB0B-recon-script
@@ -215,6 +310,7 @@ python3 k1ngb0b_recon.py
 ```
 
 **Expected Smart Output:**
+
 ```bash
 🎯 K1NGB0B Advanced Recon Script v4.0 - 99% Subdomain Coverage
 🔥 Initializing advanced reconnaissance engine...
@@ -231,6 +327,7 @@ python3 k1ngb0b_recon.py
 ```
 
 ### Comprehensive Smart Test
+
 ```bash
 # Test individual tools with verbose output
 echo "Testing smart subdomain enumeration..."
@@ -250,6 +347,7 @@ nslookup api.example.com
 ```
 
 ### Verify Smart Features
+
 ```bash
 # Check if smart progress tracking works
 python3 -c "
@@ -272,6 +370,7 @@ print(f'✅ Loaded {total_words} smart wordlist entries across {len(COMPREHENSIV
 ## 🚨 Troubleshooting Common Issues
 
 ### Issue 1: "command not found" errors
+
 ```bash
 # Solution: Fix PATH
 export PATH=$PATH:/usr/local/go/bin:$(go env GOPATH)/bin
@@ -280,6 +379,7 @@ source ~/.bashrc
 ```
 
 ### Issue 2: Go version too old
+
 ```bash
 # Remove old Go
 sudo rm -rf /usr/local/go
@@ -294,6 +394,7 @@ go version  # Should show 1.23.10
 ```
 
 ### Issue 3: Python package conflicts
+
 ```bash
 # Use virtual environment
 python3 -m venv k1ngb0b_env
@@ -305,6 +406,7 @@ python3 k1ngb0b_recon.py
 ```
 
 ### Issue 4: Permission denied errors
+
 ```bash
 # Fix permissions
 chmod +x install.sh
@@ -315,6 +417,7 @@ python3 k1ngb0b_recon.py
 ```
 
 ### Issue 5: Network timeouts during Go install
+
 ```bash
 # Set Go proxy
 export GOPROXY=https://proxy.golang.org,direct
@@ -367,14 +470,14 @@ After successful installation, K1NGB0B v4.0 should deliver these performance imp
 
 ### 🎯 Subdomain Discovery Comparison
 
-| Metric | v3.0 | v4.0 Smart | Improvement |
-|--------|------|------------|-------------|
-| **Subdomain Coverage** | ~85% | **99%** | +14% |
-| **Critical Discovery** | Manual | **Guaranteed** | 100% |
-| **Intelligence Sources** | 4 | **8+** | +100% |
-| **Real-time Progress** | Basic | **Smart ETA** | Advanced |
-| **DNS Efficiency** | Standard | **Adaptive** | +300% |
-| **Pattern Recognition** | Static | **AI-Powered** | Intelligent |
+| Metric                   | v3.0     | v4.0 Smart     | Improvement |
+| ------------------------ | -------- | -------------- | ----------- |
+| **Subdomain Coverage**   | ~85%     | **99%**        | +14%        |
+| **Critical Discovery**   | Manual   | **Guaranteed** | 100%        |
+| **Intelligence Sources** | 4        | **8+**         | +100%       |
+| **Real-time Progress**   | Basic    | **Smart ETA**  | Advanced    |
+| **DNS Efficiency**       | Standard | **Adaptive**   | +300%       |
+| **Pattern Recognition**  | Static   | **AI-Powered** | Intelligent |
 
 ### 🚀 Smart Features Verification
 

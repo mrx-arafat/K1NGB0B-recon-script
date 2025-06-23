@@ -615,24 +615,57 @@ python3 k1ngb0b_recon.py
 # Ctrl+A, D to detach
 ```
 
-## 🛠️ Supported Tools
+## 🛠️ Supported Tools - 25 Smart Go-Based Bug Bounty Recon Tools
 
-### Core Reconnaissance
+### 🧭 Subdomain Enumeration & DNS (8 Tools)
 
-- **AssetFinder** - Subdomain discovery
-- **Subfinder** - Multi-source subdomain enumeration
-- **Amass** - Comprehensive OSINT framework
-- **httpx** - Fast HTTP probing
-- **anew** - Result deduplication
+- **Subfinder** - Passive subdomain enumeration (Critical)
+- **AssetFinder** - Find subdomains via public sources (Critical)
+- **Amass** - Passive + active recon (depth-first)
+- **Findomain** - Fast subdomain finder (Rust+Go)
+- **ShuffleDNS** - DNS bruteforce using massdns logic
+- **DNSX** - DNS resolver with advanced features
+- **DNSValidator** - Check and rank DNS resolvers
+- **PureDNS** - Subdomain brute-forcer + resolver engine
 
-### Advanced Analysis
+### 🌐 HTTP Probing & Endpoint Discovery (7 Tools)
 
-- **Nuclei** - Vulnerability scanner
-- **FFUF** - Web fuzzer
+- **HTTPX** - Probes live hosts, tech stack, status, etc. (Critical)
+- **Katana** - High-speed crawler, JS parsing, deep URL extraction
+- **GAU** - Get All URLs from Wayback, AlienVault, etc.
+- **Waymore** - Like gau, but includes JS links + parameter discovery
+- **Hakrawler** - Simple web crawler for endpoint gathering
+- **GetJS** - Extract JS links from a target
+- **Arjun** - Find hidden GET & POST parameters
+
+### 🔎 Search & Intelligence (4 Tools)
+
+- **Uncover** - Search IPs/domains via Shodan, Censys, FOFA, etc.
+- **Crobat** - Subdomain lookup using the Crt.sh API
+- **Metabigor** - Intelligence tool for ASN, IP, and more
+- **Naabu** - Fast port scanner with banner grab
+
+### 📦 URL Manipulation, Fuzzing, Filtering (6 Tools)
+
+- **QSReplace** - Replace query strings with payloads
+- **FFUF** - Fast web fuzzer (directories, parameters, headers, etc.)
+- **URO** - URL deduplicator and cleaner
+- **MapCIDR** - IP/CIDR manipulation and expansion
+- **Anew** - Add new lines to a file if they don't already exist (Critical)
+- **Notify** - Send output to Discord, Slack, Telegram, etc.
+
+### 🛡️ Vulnerability & Security (4 Tools)
+
+- **Nuclei** - Vulnerability scanner (Critical)
+- **Waybackurls** - Wayback Machine URL extraction
+- **GF** - Pattern matching
+- **GF-Patterns** - Pattern collection
+
+### 🎯 Additional Analysis Tools
+
 - **Gobuster** - Directory brute-forcer
 - **Gowitness** - Screenshot tool
-- **Waybackurls** - Wayback Machine URL extraction
-- **GAU** - GetAllUrls
+- **Aquatone** - Screenshot tool
 - **ParamSpider** - Parameter discovery
 
 ### Smart Wordlists (SecLists)

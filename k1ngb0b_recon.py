@@ -518,6 +518,14 @@ class UltimateSubdomainHunter:
         results['ml_patterns'] = ml_patterns
         self._add_discoveries(ml_patterns, 'ML Patterns')
 
+        # PHASE 5: ENHANCED TOOL INTEGRATION (New 25 Smart Tools)
+        verbose_logger.info("🚀 PHASE 5: Enhanced Tool Integration (25 Smart Tools)")
+
+        # Enhanced subdomain enumeration with new tools
+        enhanced_results = await self._enhanced_tool_integration()
+        results['enhanced_tools'] = enhanced_results
+        self._add_discoveries(enhanced_results, 'Enhanced Tools')
+
         # Save ultimate results
         await self._save_ultimate_results(results, output_dir)
 
@@ -1099,14 +1107,76 @@ class UltimateSubdomainHunter:
         return []  # Placeholder for mass reverse DNS
 
     async def _dns_zone_comprehensive(self) -> List[str]:
-        """Comprehensive DNS zone analysis."""
+        """Comprehensive DNS zone analysis using enhanced tools."""
         verbose_logger.info("🌐 Comprehensive DNS zone analysis...")
-        return []  # Placeholder for zone analysis
+        subdomains = set()
+
+        # Use dnsx for advanced DNS resolution if available
+        if check_tool('dnsx'):
+            try:
+                # Create a temporary file with potential subdomains
+                import tempfile
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+                    # Generate common subdomains for testing
+                    common_subs = ['www', 'mail', 'ftp', 'admin', 'api', 'app', 'dev', 'test', 'staging']
+                    for sub in common_subs:
+                        f.write(f"{sub}.{self.domain}\n")
+                    temp_file = f.name
+
+                success, output, _ = run_command([
+                    'dnsx', '-l', temp_file, '-resp', '-a', '-aaaa', '-cname', '-silent'
+                ], timeout=60)
+
+                if success and output:
+                    for line in output.split('\n'):
+                        if line.strip() and self.domain in line:
+                            # Extract subdomain from dnsx output
+                            parts = line.split()
+                            if parts and is_valid_subdomain(parts[0], self.domain):
+                                subdomains.add(parts[0].lower())
+                                progress_tracker.add_discovery(parts[0], 'DNSX-Zone')
+
+                # Clean up temp file
+                import os
+                os.unlink(temp_file)
+
+            except Exception as e:
+                verbose_logger.warning(f"DNS zone analysis via dnsx failed: {e}")
+
+        return list(subdomains)
 
     async def _dnssec_chain_walking(self) -> List[str]:
-        """DNSSEC chain walking for subdomain discovery."""
+        """DNSSEC chain walking using enhanced DNS tools."""
         verbose_logger.info("🔐 DNSSEC chain walking...")
-        return []  # Placeholder for DNSSEC analysis
+        subdomains = set()
+
+        # Use dnsx for DNSSEC analysis if available
+        if check_tool('dnsx'):
+            try:
+                success, output, _ = run_command([
+                    'dnsx', '-d', self.domain, '-resp', '-rcode', 'noerror', '-silent'
+                ], timeout=60)
+
+                if success and output:
+                    for line in output.split('\n'):
+                        if line.strip() and self.domain in line:
+                            # Extract potential subdomains from DNSSEC responses
+                            import re
+                            pattern = rf'([a-zA-Z0-9]([a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9])?\.)*{re.escape(self.domain)}'
+                            matches = re.findall(pattern, line, re.IGNORECASE)
+                            for match in matches:
+                                if isinstance(match, tuple):
+                                    subdomain = match[0] + self.domain
+                                else:
+                                    subdomain = match
+                                if subdomain and is_valid_subdomain(subdomain, self.domain):
+                                    subdomains.add(subdomain.lower())
+                                    progress_tracker.add_discovery(subdomain, 'DNSSEC-Walk')
+
+            except Exception as e:
+                verbose_logger.warning(f"DNSSEC chain walking via dnsx failed: {e}")
+
+        return list(subdomains)
 
     async def _bgp_route_analysis(self) -> List[str]:
         """BGP route analysis for network discovery."""
@@ -1114,19 +1184,220 @@ class UltimateSubdomainHunter:
         return []  # Placeholder for BGP analysis
 
     async def _github_advanced_mining(self) -> List[str]:
-        """Advanced GitHub mining for subdomain leaks."""
+        """Advanced GitHub mining for subdomain leaks using enhanced tools."""
         verbose_logger.info("💻 Advanced GitHub mining...")
-        return []  # Placeholder for GitHub API mining
+        subdomains = set()
+
+        # Use uncover for GitHub search if available
+        if check_tool('uncover'):
+            try:
+                success, output, _ = run_command([
+                    'uncover', '-q', f'site:github.com "{self.domain}"',
+                    '-engine', 'github', '-silent'
+                ], timeout=60)
+
+                if success and output:
+                    # Parse GitHub URLs and extract potential subdomains
+                    import re
+                    pattern = rf'([a-zA-Z0-9]([a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9])?\.)*{re.escape(self.domain)}'
+                    matches = re.findall(pattern, output, re.IGNORECASE)
+                    for match in matches:
+                        if isinstance(match, tuple):
+                            subdomain = match[0] + self.domain
+                        else:
+                            subdomain = match
+                        if subdomain and is_valid_subdomain(subdomain, self.domain):
+                            subdomains.add(subdomain.lower())
+                            progress_tracker.add_discovery(subdomain, 'GitHub-Uncover')
+
+            except Exception as e:
+                verbose_logger.warning(f"GitHub mining via uncover failed: {e}")
+
+        return list(subdomains)
 
     async def _gitlab_bitbucket_mining(self) -> List[str]:
-        """GitLab and Bitbucket mining for subdomain leaks."""
+        """GitLab and Bitbucket mining using metabigor if available."""
         verbose_logger.info("🦊 GitLab and Bitbucket mining...")
-        return []  # Placeholder for GitLab/Bitbucket mining
+        subdomains = set()
+
+        # Use metabigor for GitLab/Bitbucket search if available
+        if check_tool('metabigor'):
+            try:
+                # Search GitLab
+                success, output, _ = run_command([
+                    'metabigor', 'search', '--query', f'site:gitlab.com "{self.domain}"',
+                    '--source', 'gitlab'
+                ], timeout=60)
+
+                if success and output:
+                    import re
+                    pattern = rf'([a-zA-Z0-9]([a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9])?\.)*{re.escape(self.domain)}'
+                    matches = re.findall(pattern, output, re.IGNORECASE)
+                    for match in matches:
+                        if isinstance(match, tuple):
+                            subdomain = match[0] + self.domain
+                        else:
+                            subdomain = match
+                        if subdomain and is_valid_subdomain(subdomain, self.domain):
+                            subdomains.add(subdomain.lower())
+                            progress_tracker.add_discovery(subdomain, 'GitLab-Metabigor')
+
+            except Exception as e:
+                verbose_logger.warning(f"GitLab mining via metabigor failed: {e}")
+
+        return list(subdomains)
 
     async def _pastebin_leak_mining(self) -> List[str]:
-        """Pastebin and code leak mining for subdomains."""
+        """Enhanced pastebin and code leak mining."""
         verbose_logger.info("📋 Pastebin and leak mining...")
-        return []  # Placeholder for paste site mining
+        subdomains = set()
+
+        # Use uncover for pastebin search if available
+        if check_tool('uncover'):
+            try:
+                success, output, _ = run_command([
+                    'uncover', '-q', f'"{self.domain}"',
+                    '-engine', 'shodan,censys', '-silent'
+                ], timeout=60)
+
+                if success and output:
+                    import re
+                    pattern = rf'([a-zA-Z0-9]([a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9])?\.)*{re.escape(self.domain)}'
+                    matches = re.findall(pattern, output, re.IGNORECASE)
+                    for match in matches:
+                        if isinstance(match, tuple):
+                            subdomain = match[0] + self.domain
+                        else:
+                            subdomain = match
+                        if subdomain and is_valid_subdomain(subdomain, self.domain):
+                            subdomains.add(subdomain.lower())
+                            progress_tracker.add_discovery(subdomain, 'Leak-Uncover')
+
+            except Exception as e:
+                verbose_logger.warning(f"Leak mining via uncover failed: {e}")
+
+        return list(subdomains)
+
+    async def _enhanced_tool_integration(self) -> List[str]:
+        """Enhanced tool integration using 25 smart bug bounty tools."""
+        verbose_logger.info("🚀 Integrating 25 smart bug bounty tools...")
+        subdomains = set()
+
+        # Critical subdomain enumeration tools
+        critical_tools = [
+            ('amass', ['amass', 'enum', '-passive', '-d', self.domain, '-silent']),
+            ('findomain', ['findomain', '-t', self.domain, '-q']),
+            ('shuffledns', ['shuffledns', '-d', self.domain, '-silent']),
+            ('puredns', ['puredns', 'bruteforce', '/dev/null', '-d', self.domain])
+        ]
+
+        # High priority intelligence tools
+        intelligence_tools = [
+            ('uncover', ['uncover', '-q', f'domain:{self.domain}', '-engine', 'shodan,censys', '-silent']),
+            ('crobat', ['crobat', '-s', self.domain]),
+            ('metabigor', ['metabigor', 'search', '--query', self.domain])
+        ]
+
+        # Process critical tools
+        for tool_name, command in critical_tools:
+            if check_tool(tool_name):
+                try:
+                    verbose_logger.info(f"   🔧 Running {tool_name}...")
+                    success, output, _ = run_command(command, timeout=120)
+                    if success and output:
+                        tool_subdomains = []
+                        for line in output.split('\n'):
+                            line = line.strip()
+                            if line and is_valid_subdomain(line, self.domain):
+                                tool_subdomains.append(line.lower())
+                                subdomains.add(line.lower())
+                                progress_tracker.add_discovery(line, f'Enhanced-{tool_name}')
+
+                        verbose_logger.success(f"{tool_name} completed", len(tool_subdomains))
+                    else:
+                        verbose_logger.warning(f"{tool_name} returned no results")
+                except Exception as e:
+                    verbose_logger.warning(f"{tool_name} failed: {e}")
+            else:
+                verbose_logger.info(f"   ⚠️  {tool_name} not found - install with: go install {self._get_tool_install_command(tool_name)}")
+
+        # Process intelligence tools
+        for tool_name, command in intelligence_tools:
+            if check_tool(tool_name):
+                try:
+                    verbose_logger.info(f"   🔍 Running {tool_name}...")
+                    success, output, _ = run_command(command, timeout=90)
+                    if success and output:
+                        tool_subdomains = []
+                        # Parse output for subdomains
+                        import re
+                        pattern = rf'([a-zA-Z0-9]([a-zA-Z0-9\-]{{0,61}}[a-zA-Z0-9])?\.)*{re.escape(self.domain)}'
+                        matches = re.findall(pattern, output, re.IGNORECASE)
+                        for match in matches:
+                            if isinstance(match, tuple):
+                                subdomain = match[0] + self.domain
+                            else:
+                                subdomain = match
+                            if subdomain and is_valid_subdomain(subdomain, self.domain):
+                                tool_subdomains.append(subdomain.lower())
+                                subdomains.add(subdomain.lower())
+                                progress_tracker.add_discovery(subdomain, f'Intel-{tool_name}')
+
+                        verbose_logger.success(f"{tool_name} completed", len(tool_subdomains))
+                except Exception as e:
+                    verbose_logger.warning(f"{tool_name} failed: {e}")
+
+        # Enhanced DNS resolution with dnsx
+        if check_tool('dnsx'):
+            try:
+                verbose_logger.info("   🌐 Running enhanced DNS resolution with dnsx...")
+                # Create temporary wordlist with discovered subdomains
+                import tempfile
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
+                    # Add critical business subdomains
+                    for word in ULTIMATE_WORDLISTS['critical_business']:
+                        f.write(f"{word}.{self.domain}\n")
+                    temp_file = f.name
+
+                success, output, _ = run_command([
+                    'dnsx', '-l', temp_file, '-resp', '-a', '-silent'
+                ], timeout=180)
+
+                if success and output:
+                    dns_subdomains = []
+                    for line in output.split('\n'):
+                        if line.strip() and self.domain in line:
+                            parts = line.split()
+                            if parts and is_valid_subdomain(parts[0], self.domain):
+                                dns_subdomains.append(parts[0].lower())
+                                subdomains.add(parts[0].lower())
+                                progress_tracker.add_discovery(parts[0], 'Enhanced-DNSX')
+
+                    verbose_logger.success("DNSX enhanced resolution completed", len(dns_subdomains))
+
+                # Clean up temp file
+                import os
+                os.unlink(temp_file)
+
+            except Exception as e:
+                verbose_logger.warning(f"Enhanced DNS resolution failed: {e}")
+
+        verbose_logger.success(f"Enhanced tool integration completed", len(subdomains))
+        return list(subdomains)
+
+    def _get_tool_install_command(self, tool_name: str) -> str:
+        """Get the installation command for a tool."""
+        install_commands = {
+            'amass': 'github.com/owasp-amass/amass/v4/cmd/amass@latest',
+            'findomain': 'github.com/findomain/findomain@latest',
+            'shuffledns': 'github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest',
+            'dnsx': 'github.com/projectdiscovery/dnsx/cmd/dnsx@latest',
+            'puredns': 'github.com/d3mondev/puredns/v2@latest',
+            'uncover': 'github.com/projectdiscovery/uncover/cmd/uncover@latest',
+            'crobat': 'github.com/cgboal/sonarsearch/cmd/crobat@latest',
+            'metabigor': 'github.com/j3ssie/metabigor@latest'
+        }
+        return install_commands.get(tool_name, f'{tool_name}@latest')
 
     async def _save_ultimate_results(self, results: Dict, output_dir: str):
         """Save ultimate discovery results with comprehensive analysis."""
@@ -3374,21 +3645,50 @@ def check_dependencies():
     if not DNS_AVAILABLE:
         optional_missing.append("dnspython (Python package)")
 
-    # Check required system tools
+    # Check required system tools - 25 Smart Bug Bounty Recon Tools
     required_tools = {
         'assetfinder': 'AssetFinder (Go tool)',
         'subfinder': 'Subfinder (Go tool)',
         'httpx': 'httpx (Go tool)',
-        'anew': 'anew (Go tool)'
+        'anew': 'anew (Go tool)',
+        'nuclei': 'Nuclei (Vulnerability scanner)'
     }
 
-    # Check optional tools
+    # Check optional tools - Enhanced with 25 Smart Tools
     optional_tools = {
-        'amass': 'Amass (Go tool)',
-        'nmap': 'Nmap (Network scanner)',
-        'nuclei': 'Nuclei (Vulnerability scanner)',
-        'waybackurls': 'Waybackurls (Go tool)',
-        'gau': 'GetAllUrls (Go tool)'
+        # Subdomain Enumeration & DNS
+        'amass': 'Amass (Passive + active recon)',
+        'findomain': 'Findomain (Fast subdomain finder)',
+        'shuffledns': 'ShuffleDNS (DNS bruteforce)',
+        'dnsx': 'DNSX (DNS resolver with advanced features)',
+        'dnsvalidator': 'DNSValidator (Check and rank DNS resolvers)',
+        'puredns': 'PureDNS (Subdomain brute-forcer + resolver)',
+
+        # HTTP Probing & Endpoint Discovery
+        'katana': 'Katana (High-speed crawler)',
+        'gau': 'GetAllUrls (URL discovery)',
+        'waymore': 'Waymore (Enhanced URL discovery)',
+        'hakrawler': 'Hakrawler (Web crawler)',
+        'getJS': 'GetJS (Extract JS links)',
+        'arjun': 'Arjun (Parameter discovery)',
+
+        # Search & Intelligence
+        'uncover': 'Uncover (Search via Shodan, Censys, FOFA)',
+        'crobat': 'Crobat (Crt.sh API subdomain lookup)',
+        'metabigor': 'Metabigor (Intelligence tool)',
+        'naabu': 'Naabu (Fast port scanner)',
+
+        # URL Manipulation & Fuzzing
+        'qsreplace': 'QSReplace (Query string replacement)',
+        'ffuf': 'FFUF (Fast web fuzzer)',
+        'uro': 'URO (URL deduplicator)',
+        'mapcidr': 'MapCIDR (IP/CIDR manipulation)',
+        'notify': 'Notify (Send output to Discord/Slack)',
+
+        # Legacy tools
+        'waybackurls': 'Waybackurls (Wayback Machine URLs)',
+        'gf': 'GF (Pattern matching)',
+        'nmap': 'Nmap (Network scanner)'
     }
 
     for tool, description in required_tools.items():
