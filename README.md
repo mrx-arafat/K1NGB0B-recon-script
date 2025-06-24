@@ -28,6 +28,42 @@ _Two-Stage Professional Reconnaissance • 15+ Advanced Techniques • Maximum D
 
 ---
 
+## 🚀 Quick Start
+
+**🔥 NEW: Complete Domain Discovery (Recommended)**
+
+```bash
+# 1. Clone and setup
+git clone https://github.com/mrx-arafat/k1ngb0b-recon.git
+cd k1ngb0b-recon
+chmod +x install.sh && ./install.sh
+
+# 2. Run complete reconnaissance
+python3 domain_discovery.py example.com
+
+# 3. Review results
+ls example_com_results_*/
+cat example_com_results_*/08_final_reports/executive_summary.txt
+```
+
+**📊 Professional Output Structure:**
+
+```
+📂 domain_results_timestamp/
+├── 📊 01_raw_discovery/          # Raw tool outputs
+├── 📋 02_processed_data/         # Cleaned & validated data
+├── 🔍 03_live_analysis/          # Live subdomain intelligence
+├── 🛠️  04_technologies/          # Technology fingerprinting
+├── 🚨 05_vulnerabilities/        # Security assessment
+├── 🔌 06_port_scanning/          # Network analysis (RustScan)
+├── 📸 07_screenshots/            # Visual evidence
+├── 📊 08_final_reports/          # Executive summaries
+├── 🔥 09_advanced_discovery/     # Advanced techniques
+└── 📋 10_manual_verification/    # Investigation checklists
+```
+
+---
+
 ## 🔥 ULTIMATE RECONNAISSANCE SUITE
 
 K1NGB0B ULTIMATE v2.0.69 is the **most comprehensive reconnaissance suite ever created**. Featuring **two powerful stages** of reconnaissance with **15+ cutting-edge techniques**, **AI-powered pattern recognition**, and **professional vulnerability analysis**.
@@ -191,12 +227,13 @@ TOTAL: 170+ intelligent patterns across 9 categories
 
 The ULTIMATE suite consists of cutting-edge components:
 
-1. **`k1ngb0b_recon.py`** - ULTIMATE reconnaissance engine with 99.9% coverage and 15+ techniques
-2. **`k1ngb0b_recon_II.py`** - Advanced post-reconnaissance analysis and exploitation framework
-3. **UltimateSubdomainHunter** - AI-powered discovery engine with 15+ advanced techniques
-4. **SmartProgressTracker** - Real-time animated progress with ETA calculations
-5. **SmartOutputManager** - Professional 10-tier organized output structure
-6. **AI Pattern Generator** - Machine learning-inspired subdomain pattern recognition
+1. **`domain_discovery.py`** - Complete domain reconnaissance with professional output structure
+2. **`k1ngb0b_recon.py`** - ULTIMATE reconnaissance engine with 99.9% coverage and 15+ techniques
+3. **`k1ngb0b_recon_II.py`** - Advanced post-reconnaissance analysis and exploitation framework
+4. **UltimateSubdomainHunter** - AI-powered discovery engine with 15+ advanced techniques
+5. **SmartProgressTracker** - Real-time animated progress with ETA calculations
+6. **SmartOutputManager** - Professional 10-tier organized output structure
+7. **AI Pattern Generator** - Machine learning-inspired subdomain pattern recognition
 
 ## 📦 Smart Installation System
 
@@ -277,9 +314,169 @@ source ~/.bashrc
 - Manual guide: `/tmp/k1ngb0b_manual_guide.txt`
 - Complete manual: `MANUAL_INSTALL.md`
 
-## 🎯 Usage - Two-Stage Professional Reconnaissance
+## 🎯 Usage - Complete Domain Reconnaissance
 
-### 🔍 STAGE 1: Maximum Subdomain Discovery
+### 🔥 NEW: Complete Domain Discovery (Recommended)
+
+**🚀 All-in-One Professional Reconnaissance Engine**
+
+```bash
+# Basic usage
+python3 domain_discovery.py example.com
+
+# The script will automatically:
+# 1. Create organized output directory structure
+# 2. Run 15+ discovery techniques
+# 3. Perform live analysis and technology detection
+# 4. Conduct vulnerability assessment with Nuclei
+# 5. Scan ports with RustScan
+# 6. Capture screenshots with Gowitness
+# 7. Perform advanced URL discovery
+# 8. Generate manual verification checklist
+# 9. Create executive summary and reports
+```
+
+**📋 Prerequisites:**
+
+Make sure you have the required tools installed:
+
+```bash
+# Run the installer first
+chmod +x install.sh && ./install.sh
+
+# Or install tools manually:
+go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+go install github.com/tomnomnom/assetfinder@latest
+go install github.com/owasp-amass/amass/v4/...@master
+go install github.com/projectdiscovery/httpx/cmd/httpx@latest
+go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+cargo install rustscan
+go install github.com/projectdiscovery/katana/cmd/katana@latest
+go install github.com/lc/gau/v2/cmd/gau@latest
+go install github.com/tomnomnom/waybackurls@latest
+go install github.com/ffuf/ffuf/v2@latest
+go install github.com/sensepost/gowitness@latest
+```
+
+**🧠 What the Complete Discovery Engine Does:**
+
+```bash
+🔥 K1NGB0B Domain Discovery v2.0 - Complete Reconnaissance Suite
+🎯 Target: example.com
+📁 Output: example_com_results_20240616_143022
+⚡ 15+ Advanced Discovery Techniques
+
+🔧 Checking required tools...
+✅ subfinder: Passive subdomain enumeration
+✅ assetfinder: Find subdomains via public sources
+✅ amass: Passive + active recon
+✅ httpx: HTTP probing and analysis
+✅ nuclei: Vulnerability scanner
+✅ rustscan: Fast port scanner
+
+============================================================
+📊 PHASE 1: RAW DISCOVERY
+============================================================
+🔍 Running Subfinder (Passive Enumeration)...
+✅ Subfinder found 127 subdomains
+🔍 Running AssetFinder...
+✅ AssetFinder found 89 subdomains
+🔍 Running Amass (Comprehensive Enumeration)...
+✅ Amass found 234 subdomains
+🔍 Running Certificate Transparency (crt.sh)...
+✅ crt.sh found 156 subdomains
+
+============================================================
+📋 PHASE 2: DATA PROCESSING
+============================================================
+📋 Processing 456 discovered subdomains...
+✅ Processed 398 unique subdomains
+
+============================================================
+🔍 PHASE 3: LIVE ANALYSIS
+============================================================
+🔍 Running HTTPX (Live Analysis) on 398 subdomains...
+✅ HTTPX found 89 live subdomains
+
+============================================================
+🛠️  PHASE 4: TECHNOLOGY DETECTION
+============================================================
+🛠️  Saving technology fingerprints...
+✅ Detected 12 different technologies
+
+============================================================
+🚨 PHASE 5: VULNERABILITY ASSESSMENT
+============================================================
+🚨 Running Nuclei (Vulnerability Assessment)...
+⏳ Nuclei scanning... (this may take a while)
+   🔴 Critical: 2
+   🟠 High: 5
+   🟡 Medium: 8
+   🟢 Low: 12
+✅ Nuclei completed - found 27 vulnerabilities
+
+============================================================
+🔌 PHASE 6: PORT SCANNING
+============================================================
+🔌 Running RustScan (Port Scanning)...
+✅ RustScan completed - found 45 open ports
+
+============================================================
+📸 PHASE 7: SCREENSHOT CAPTURE
+============================================================
+📸 Running Gowitness (Screenshot Capture)...
+✅ Gowitness completed - captured 89 screenshots
+
+============================================================
+🔥 PHASE 8: ADVANCED DISCOVERY
+============================================================
+🔥 Running Wayback URLs (Advanced Discovery)...
+✅ Wayback URLs found 1,234 historical URLs
+🔥 Running GAU (Get All URLs)...
+✅ GAU found 567 URLs
+🔥 Running Katana (Web Crawler)...
+✅ Katana crawled 890 URLs
+🔥 Running FFUF (Directory Fuzzing)...
+✅ FFUF found 23 directories
+
+============================================================
+📋 PHASE 9: MANUAL VERIFICATION CHECKLIST
+============================================================
+📋 Generating Manual Verification Checklist...
+✅ Manual verification checklist created
+
+============================================================
+📊 FINAL SUMMARY
+============================================================
+🎯 Target: example.com
+📈 Total subdomains discovered: 398
+🟢 Live subdomains: 89
+🛠️  Technologies detected: 12
+🚨 Vulnerabilities found: 27
+📸 Screenshots captured: 89
+📁 Results saved to: example_com_results_20240616_143022/
+
+🎯 Next Steps:
+   📋 Review: example_com_results_20240616_143022/10_manual_verification/manual_checklist.md
+   📊 Summary: example_com_results_20240616_143022/08_final_reports/executive_summary.txt
+
+✅ Comprehensive reconnaissance completed successfully!
+```
+
+**🎯 Complete Discovery Features:**
+
+- ✅ **Professional Output Structure**: 10-tier organized directory structure
+- ✅ **15+ Discovery Techniques**: Subfinder, AssetFinder, Amass, crt.sh, and more
+- ✅ **Live Subdomain Analysis**: HTTPX integration with comprehensive status reporting
+- ✅ **Technology Detection**: Automatic fingerprinting of discovered services
+- ✅ **Vulnerability Assessment**: Nuclei integration with severity categorization
+- ✅ **Port Scanning**: RustScan integration for fast port discovery
+- ✅ **Visual Evidence**: Screenshot capture of all live services
+- ✅ **Advanced Discovery**: Wayback URLs, GAU, Katana crawler, directory fuzzing
+- ✅ **Manual Verification**: Comprehensive checklist for manual testing
+- ✅ **Executive Reporting**: Professional summaries and actionable findings
+
+### 🔍 STAGE 1: Maximum Subdomain Discovery (Legacy)
 
 **🚀 Primary Reconnaissance Engine**
 
@@ -441,7 +638,60 @@ python3 k1ngb0b_recon_II.py
 - **Manual Review Guidance**: Clear next-step instructions
 - **JSON Export**: Machine-readable results
 
-## 📁 Output Structure
+## 📁 Professional Output Structure
+
+### 🔥 NEW: Complete Domain Discovery Output Structure
+
+The new `domain_discovery.py` creates the most organized and professional output structure:
+
+```
+📂 domain_results_timestamp/
+├── 📊 01_raw_discovery/          # Raw tool outputs
+│   ├── subfinder.txt
+│   ├── assetfinder.txt
+│   ├── amass.txt
+│   └── crt_sh.txt
+├── 📋 02_processed_data/         # Cleaned & validated data
+│   ├── all_subdomains.txt
+│   └── discovery_summary.json
+├── 🔍 03_live_analysis/          # Live subdomain intelligence
+│   ├── httpx_results.json
+│   └── live_subdomains.txt
+├── 🛠️  04_technologies/          # Technology fingerprinting
+│   ├── detected_technologies.json
+│   └── technology_summary.json
+├── 🚨 05_vulnerabilities/        # Security assessment
+│   ├── nuclei_results.json
+│   └── vulnerability_summary.json
+├── 🔌 06_port_scanning/          # Network analysis
+│   ├── targets.txt
+│   ├── rustscan_results.txt
+│   └── port_scan_results.json
+├── 📸 07_screenshots/            # Visual evidence
+│   └── *.png (screenshot files)
+├── 📊 08_final_reports/          # Executive summaries
+│   ├── reconnaissance_summary.json
+│   └── executive_summary.txt
+├── 🔥 09_advanced_discovery/     # Advanced techniques
+│   ├── wayback_urls.txt
+│   ├── gau_urls.txt
+│   ├── katana_urls.txt
+│   └── directories/
+└── 📋 10_manual_verification/    # Investigation checklists
+    ├── manual_checklist.md
+    └── quick_checklist.txt
+```
+
+### 🎯 Key Output Files
+
+- **🎯 executive_summary.txt** - High-level findings and next steps
+- **🟢 live_subdomains.txt** - Confirmed live subdomains for testing
+- **📈 reconnaissance_summary.json** - Complete technical data
+- **🚨 vulnerability_summary.json** - Security findings by severity
+- **📋 manual_checklist.md** - Comprehensive manual verification guide
+- **📸 screenshots/** - Visual evidence of discovered services
+
+### 📊 Legacy Output Structure
 
 ```
 target_domain_results_20240616_143022/

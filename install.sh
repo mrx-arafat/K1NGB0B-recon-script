@@ -336,6 +336,9 @@ install_go_tools() {
         "github.com/tomnomnom/waybackurls@latest:waybackurls:medium"
         "github.com/tomnomnom/gf@latest:gf:medium"
         "github.com/1ndianl33t/Gf-Patterns@latest:gf-patterns:low"
+
+        # 🔌 Port Scanning & Network Analysis (High Priority)
+        "github.com/sensepost/gowitness@latest:gowitness:high"
     )
 
     local failed_tools=()
@@ -487,6 +490,20 @@ install_additional_tools() {
     if command_exists apt-get; then
         print_progress "Installing additional system tools..."
         sudo apt-get install -y gobuster dirb 2>/dev/null || print_warning "Some additional tools may not be available"
+    fi
+
+    # Install RustScan (fast port scanner)
+    print_progress "Installing RustScan..."
+    if command_exists cargo; then
+        cargo install rustscan 2>/dev/null || print_warning "RustScan installation failed - install manually with: cargo install rustscan"
+        print_success "RustScan installed for fast port scanning"
+    else
+        print_warning "Cargo not found - install Rust first to get RustScan"
+        print_manual "# RustScan installation (requires Rust/Cargo):"
+        print_manual "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+        print_manual "source ~/.cargo/env"
+        print_manual "cargo install rustscan"
+        print_manual ""
     fi
 
     # Install ParamSpider for parameter discovery
